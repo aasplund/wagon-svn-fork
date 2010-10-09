@@ -35,11 +35,11 @@
  */
 package com.sun.wts.tools.maven;
 
-import org.tmatesoft.svn.core.io.ISVNWorkspaceMediator;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.io.ISVNWorkspaceMediator;
 
 /**
- *
+ * 
  * @author Kohsuke Kawaguchi
  */
 public class CommitMediator implements ISVNWorkspaceMediator {
