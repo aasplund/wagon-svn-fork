@@ -132,6 +132,49 @@ Using Wagon-svn with other subversion repositories
     in your {{{http://maven.apache.org/settings.html#Servers}~/.m2/settings.xml}}, just like you do with
     wagon-ssh. Second, if Maven is launched interactively, wagon-svn will prompt you interactively.
 
+* Configuration
+
+    Wagon-svn can take information necessary for 
+    {{{http://svnbook.red-bean.com/en/1.5/svn.advanced.confarea.html}configuration}}
+    in two ways. 
+    
+    First, you can use the
+    {{{http://svnkit.com/kb/javadoc/org/tmatesoft/svn/core/wc/SVNWCUtil.html#getDefaultConfigurationDirectory()}default location}}.
+
+    Second, you can specify a custom configuration directory by defining a
+    "com.sun.wts.tools.maven.SubversionWagon_svnConfigurationDirectory" system property, e.g.:
+
+--------------------------------------------
+mvn deploy -D com.sun.wts.tools.maven.SubversionWagon_svnConfigurationDirectory=./target/svnConfigurationDirectory/
+--------------------------------------------
+
+    The previous example works well with storing your configuration in a project subfolder.
+    Here is a pattern to ensure the configuration directory is a fresh copy of your custom 
+    configuration:
+
+--------------------------------------------
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-resources-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>copy-svnConfigurationDirectory</id>
+      <phase> (something before deploy) </phase>
+      <goals>
+        <goal>copy-resources</goal>
+      </goals>
+      <configuration>
+        <outputDirectory>${project.build.directory}/svnConfigurationDirectory</outputDirectory>
+        <resources>
+          <resource>
+            <directory>${project.basedir}/src/etc/svnConfigurationDirectory</directory>
+          </resource>
+        </resources>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+--------------------------------------------
 
 Using Wagon-svn with deploy:deploy-file
 

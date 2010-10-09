@@ -36,6 +36,7 @@
 package com.sun.wts.tools.maven;
 
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNPropertyValue;
 import org.tmatesoft.svn.core.io.ISVNWorkspaceMediator;
 
 /**
@@ -43,10 +44,10 @@ import org.tmatesoft.svn.core.io.ISVNWorkspaceMediator;
  * @author Kohsuke Kawaguchi
  */
 public class CommitMediator implements ISVNWorkspaceMediator {
-    public String getWorkspaceProperty(String path, String name) throws SVNException {
+    public SVNPropertyValue getWorkspaceProperty(String path, String name) throws SVNException {
         return null;
     }
 
-    public void setWorkspaceProperty(String path, String name, String value) throws SVNException {
+    public void setWorkspaceProperty(String path, String name, SVNPropertyValue value) throws SVNException {
     }
 }
