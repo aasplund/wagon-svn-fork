@@ -1,0 +1,166 @@
+What is this?
+
+    This extension module to Maven allows you to deploy artifacts and sites to Subversion repository.
+    (In Maven jargon, this module is classified as a {{{http://maven.apache.org/wagon/}Wagon provider}}.)
+
+Why do I care?
+
+    The primary use case of this module is to host maven projects on java.net more easily. Using
+    Maven-generated site as java.net website requires this capability, as www contents in java.net are
+    all controlled under Subversion. Similarly, to deploy artifacts into
+    {{{https://maven2-repository.dev.java.net/}the java.net maven2 repository}}, you need this capability, too.
+
+    Beyond that, if you are hosting a repository or a site in a place controlled under Subversion,
+    this module can be used to directly push artifacts into there, thereby avoiding additional
+    subversion operations.
+
+Using Wagon-svn with java.net
+
+    First, you need to add the following entries into your POM:
+
+--------------------------------------------
+  <build>
+    ...
+    <extensions>
+      <extension>
+        <groupId>org.jvnet.wagon-svn</groupId>
+        <artifactId>wagon-svn</artifactId>
+        <version>1.8</version>
+      </extension>
+    </extensions>
+  </build>
+
+  <repositories>
+    ...
+    <repository>
+      <id>maven2-repository.dev.java.net</id>
+      <name>Java.net Repository for Maven</name>
+      <url>http://download.java.net/maven/2/</url>
+    </repository>
+  </repositories>
+--------------------------------------------
+
+    This enables the wagon-svn module for your build. If your project is a multi-module project,
+    just do this at the top-level POM.
+
+* How to deploy Maven-generate site to your java.net project
+
+    Suppose your java.net project name is 'xyz'. To have "<<<maven site:deploy>>>" upload
+    contents to this project, set the distribution management portion of the POM as follows:
+
+--------------------------------------------
+  <distributionManagement>
+    <site>
+      <id>xyz-www</id>
+      <url>java-net:/xyz/trunk/www/</url>
+    </site>
+    ...
+  </distributionManagement>
+--------------------------------------------
+
+    You can then run "<<<mvn site:deploy>>>" normally. Also, if you are doing this, you might find
+    {{{https://maven-javanet-skin.dev.java.net/}maven2 java.net skin}} useful, so that your
+    site look&feel matches the rest of java.net.
+
+
+* How to deploy artifacts to the java.net maven2 repository
+
+    Once you get a commit access to the java.net maven2 repository, set the distribution management
+    portion of the POM as follows:
+
+--------------------------------------------
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>java.net-maven2-repository</id>
+      <url>java-net:/maven2-repository/trunk/repository/</url>
+    </repository>
+    ...
+  </distributionManagement>
+--------------------------------------------
+
+    This causes "<<<mvn deploy>>>" and "<<<mvn release:perform>>>" to deploy artifacts
+    to the java.net maven2 repository.
+
+* Authentication
+
+    Be sure to set up <<<~/.java.net>>> as described in
+    {{{https://javanettasks.dev.java.net/nonav/maven/config.html}this document}},
+    so that Maven can use this username/password to log in.
+
+    Alternatively, you can specify your username/password
+    in your {{{http://maven.apache.org/settings.html#Servers}~/.m2/settings.xml}}, just like you do with
+    wagon-ssh.
+
+Using Wagon-svn with other subversion repositories
+
+* How to deploy Maven-generate site to a subversion repository
+
+    Suppose your subversion repository is <<<svn+ssh://server/repo/abc/docs>>>. To have "<<<maven site:deploy>>>" upload
+    contents to this folder, set the distribution management portion of the POM as follows:
+
+--------------------------------------------
+  <distributionManagement>
+    <site>
+      <id>abc-docs</id>
+      <url>svn:svn+ssh://server/repo/abc/docs</url>
+    </site>
+    ...
+  </distributionManagement>
+--------------------------------------------
+
+* How to deploy artifacts to a subversion repository
+
+    Suppose your subversion repository is <<<http://server/svn/maven/repo/>>>. To have "<<<maven deploy>>>" upload
+    artifacts to this folder, set the distribution management portion of the POM as follows:
+
+--------------------------------------------
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>my-maven-repo</id>
+      <url>svn:http://server/svn/maven/repo/</url>
+    </repository>
+    ...
+  </distributionManagement>
+--------------------------------------------
+
+
+* Authentication
+
+    Wagon-svn can take information necessary for authentication in two ways. First, you can specify this
+    in your {{{http://maven.apache.org/settings.html#Servers}~/.m2/settings.xml}}, just like you do with
+    wagon-ssh. Second, if Maven is launched interactively, wagon-svn will prompt you interactively.
+
+
+Using Wagon-svn with deploy:deploy-file
+
+    Because wagon-svn is not a built-in wagon transport, making it work with <<<mvn deploy:deploy-file>>> requires
+    one extra step. First, save the following POM by some name, such as <<<deploy.pom>>>
+
+--------------------------------------------
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dummy</groupId>
+  <artifactId>wagn-svn-deploy-pom/artifactId>
+  <packaging>pom</packaging>
+  <version>1</version>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.jvnet.wagon-svn</groupId>
+        <artifactId>wagon-svn</artifactId>
+        <version>1.8</version>
+      </extension>
+    </extensions>
+  </build>
+</project>
+--------------------------------------------
+
+    Then invoke the <<<mvn deploy:depoloy-file>>> with additional <<<-f path/to/deploy.pom>>>, such as:
+
+--------------------------------------------
+mvn deploy:deploy-file -f deploy.pom -DpomFile=my.pom -Dfile=my.jar -Durl=...
+--------------------------------------------
+
