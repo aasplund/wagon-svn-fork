@@ -1,0 +1,1 @@
+A forked implementation of wagon-svn. The aim of the project is to add support for the svnprop mimetype. It sould also be possible to use commit instead of import when sending content from site deploy.
